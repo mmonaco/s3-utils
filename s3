@@ -1,0 +1,109 @@
+#!/usr/bin/env python2
+
+# This file is part of s3-utils.
+#
+# Copyright 2012 Matthew Monaco
+#
+# s3-utils is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# s3-utils is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with ec2-utils.  If not, see <http://www.gnu.org/licenses/>.
+
+import os, re, sys, subprocess
+import argparse
+import boto.s3.connection
+
+S3_USAGE = """\
+usage: s3 [-h|--help] [<options>] <command> [<args>]
+
+  An OpenStack/Eucalyptus S3 storage tool
+
+  s3 ls
+     List all buckets.
+
+  options:
+    -h, --help         print this message and exit
+
+"""
+
+def _parse_url(url):
+
+	m = re.match("http://(.+):(\d+)(/.+)?", url)
+
+	if m and m.lastindex >= 2:
+		host = m.group(1)
+		port = int(m.group(2))
+		path = m.group(3) if m.group(3) else "/"
+	else:
+		raise Exception("parse_url: bad input '%s'" % url)
+
+	return host, port, path
+
+
+def _cxn_from_env():
+
+	ec2_access = os.getenv("EC2_ACCESS_KEY")
+	ec2_secret = os.getenv("EC2_SECRET_KEY")
+	s3_url     = os.getenv("S3_URL")
+
+	s3_host, s3_port, s3_path = _parse_url(s3_url)
+
+	cxn = boto.s3.connection.S3Connection(
+		aws_access_key_id=ec2_access,
+		aws_secret_access_key=ec2_secret,
+		host=s3_host,
+		port=s3_port,
+		path=s3_path,
+		is_secure=False,
+		calling_format=boto.s3.connection.OrdinaryCallingFormat()
+		)
+
+	return cxn
+
+
+def s3_ls_buckets(cxn):
+
+	buckets = cxn.get_all_buckets()
+	bnames = [b.name for b in buckets]
+	bnames.sort()
+	for bn in bnames:
+		print(bn)
+
+
+def s3_argparse():
+
+	parser = argparse.ArgumentParser()
+
+	parser.print_help   = lambda fd=sys.stdout : fd.write(S3_USAGE)
+	parser.print_usage  = lambda fd=sys.stdout : fd.write(S3_USAGE)
+	parser.format_help  = lambda : S3_USAGE
+	parser.format_usage = lambda : S3_USAGE
+
+	sparsers = parser.add_subparsers(dest="cmd")
+
+	parser_ls = sparsers.add_parser("ls")
+
+	args = parser.parse_args()
+
+	return args
+
+
+if __name__ == "__main__":
+
+	args = s3_argparse()
+
+	cxn = _cxn_from_env()
+
+	if args.cmd == "ls":
+		s3_ls_buckets(cxn)
+
+
+# vim :set noet
