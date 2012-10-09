@@ -32,6 +32,9 @@ usage: s3 [-h|--help] [<options>] <command> [<args>]
   s3 ls <bucket>
      List all keys in the given bucket.
 
+  s3 mk <bucket>
+     Create a new bucket.
+
   options:
     -h, --help         print this message and exit
     -o, --openstack    source ~/.novarc
@@ -112,6 +115,11 @@ def s3_ls_bucket_keys(cxn, bucketname):
 		print("\t%s" % kn)
 
 
+def s3_mk(cxn, bucketname):
+
+	cxn.create_bucket(bucketname)
+
+
 def s3_argparse():
 
 	parser = argparse.ArgumentParser()
@@ -128,6 +136,9 @@ def s3_argparse():
 
 	parser_ls = sparsers.add_parser("ls")
 	parser_ls.add_argument("bucket", nargs="?", default=None)
+
+	parser_mk = sparsers.add_parser("mk")
+	parser_mk.add_argument("bucket")
 
 	args = parser.parse_args()
 
@@ -148,6 +159,9 @@ if __name__ == "__main__":
 			s3_ls_bucket_keys(cxn, args.bucket)
 		else:
 			s3_ls_buckets(cxn)
+
+	elif args.cmd == "mk":
+		s3_mk(cxn, args.bucket)
 
 
 # vim :set noet
