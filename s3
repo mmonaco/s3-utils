@@ -29,6 +29,9 @@ usage: s3 [-h|--help] [<options>] <command> [<args>]
   s3 ls
      List all buckets.
 
+  s3 ls <bucket>
+     List all keys in the given bucket.
+
   options:
     -h, --help         print this message and exit
     -o, --openstack    source ~/.novarc
@@ -98,6 +101,17 @@ def s3_ls_buckets(cxn):
 		print(bn)
 
 
+def s3_ls_bucket_keys(cxn, bucketname):
+
+	bkt  = cxn.get_bucket(bucketname)
+	keys = bkt.get_all_keys()
+	knames = [k.name for k in keys]
+	knames.sort()
+	print(bkt.name)
+	for kn in knames:
+		print("\t%s" % kn)
+
+
 def s3_argparse():
 
 	parser = argparse.ArgumentParser()
@@ -113,6 +127,7 @@ def s3_argparse():
 	sparsers = parser.add_subparsers(dest="cmd")
 
 	parser_ls = sparsers.add_parser("ls")
+	parser_ls.add_argument("bucket", nargs="?", default=None)
 
 	args = parser.parse_args()
 
@@ -129,7 +144,10 @@ if __name__ == "__main__":
 	cxn = _cxn_from_env()
 
 	if args.cmd == "ls":
-		s3_ls_buckets(cxn)
+		if args.bucket:
+			s3_ls_bucket_keys(cxn, args.bucket)
+		else:
+			s3_ls_buckets(cxn)
 
 
 # vim :set noet
