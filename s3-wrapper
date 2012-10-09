@@ -1,0 +1,17 @@
+#!/bin/sh
+
+cmd="$(basename "$0")"
+
+case "$cmd" in
+	s3-get)
+		exec ./s3 get "$@"
+		;;
+	s3-set)
+		exec ./s3 set "$@"
+		;;
+	s3-rmbucket)
+		exec ./s3 rm "$@"
+		;;
+	*)
+		exec ./s3 "$@"
+esac
