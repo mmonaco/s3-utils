@@ -41,6 +41,13 @@ usage: s3 [-h|--help] [<options>] <command> [<args>]
   s3 rm <bucket> <key>
      Remove a key from a bucket.
 
+  s3 get <bucket> <key> [<file>]
+     Retrieve the contents of bucket/key and place them in file, or stdout if
+     not given
+
+  s3 put <bucket> <key> [<file>]
+     Populate bucket/key with the contents of file, or stdin if not given.
+
   options:
     -h, --help         print this message and exit
     -o, --openstack    source ~/.novarc
@@ -137,6 +144,20 @@ def s3_rm_key(cxn, bucketname, keyname):
 	bkt.delete_key(keyname)
 
 
+def s3_set(cxn, bucketname, keyname, fd):
+
+	bkt = cxn.get_bucket(bucketname)
+	key = bkt.get_key(keyname)
+	key.set_contents_from_file(fd)
+
+
+def s3_get(cxn, bucketname, keyname, fd):
+
+	bkt = cxn.get_bucket(bucketname)
+	key = bkt.get_key(keyname)
+	key.get_contents_to_file(fd)
+
+
 def s3_argparse():
 
 	parser = argparse.ArgumentParser()
@@ -153,6 +174,16 @@ def s3_argparse():
 
 	parser_ls = sparsers.add_parser("ls")
 	parser_ls.add_argument("bucket", nargs="?", default=None)
+
+	parser_get = sparsers.add_parser("get")
+	parser_get.add_argument("bucket")
+	parser_get.add_argument("key")
+	parser_get.add_argument("file", nargs="?", default=sys.stdout, type=argparse.FileType("w"))
+
+	parser_set = sparsers.add_parser("set")
+	parser_set.add_argument("bucket")
+	parser_set.add_argument("key")
+	parser_set.add_argument("file", nargs="?", default=sys.stdin, type=argparse.FileType("r"))
 
 	parser_mk = sparsers.add_parser("mk")
 	parser_mk.add_argument("bucket")
@@ -189,6 +220,12 @@ if __name__ == "__main__":
 			s3_rm_key(cxn, args.bucket, args.key)
 		else:
 			s3_rm_bucket(cxn, args.bucket)
+
+	elif args.cmd == "get":
+		s3_get(cxn, args.bucket, args.key, args.file)
+
+	elif args.cmd == "set":
+		s3_set(cxn, args.bucket, args.key, args.file)
 
 
 # vim :set noet
