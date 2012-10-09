@@ -35,6 +35,12 @@ usage: s3 [-h|--help] [<options>] <command> [<args>]
   s3 mk <bucket>
      Create a new bucket.
 
+  s3 rm <bucket>
+     Remove an existing bucket.
+
+  s3 rm <bucket> <key>
+     Remove a key from a bucket.
+
   options:
     -h, --help         print this message and exit
     -o, --openstack    source ~/.novarc
@@ -120,6 +126,17 @@ def s3_mk(cxn, bucketname):
 	cxn.create_bucket(bucketname)
 
 
+def s3_rm_bucket(cxn, bucketname):
+
+	cxn.delete_bucket(bucketname)
+
+
+def s3_rm_key(cxn, bucketname, keyname):
+
+	bkt = cxn.get_bucket(bucketname)
+	bkt.delete_key(keyname)
+
+
 def s3_argparse():
 
 	parser = argparse.ArgumentParser()
@@ -139,6 +156,10 @@ def s3_argparse():
 
 	parser_mk = sparsers.add_parser("mk")
 	parser_mk.add_argument("bucket")
+
+	parser_rm = sparsers.add_parser("rm")
+	parser_rm.add_argument("bucket")
+	parser_rm.add_argument("key", nargs="?", default=None)
 
 	args = parser.parse_args()
 
@@ -162,6 +183,12 @@ if __name__ == "__main__":
 
 	elif args.cmd == "mk":
 		s3_mk(cxn, args.bucket)
+
+	elif args.cmd == "rm":
+		if args.key:
+			s3_rm_key(cxn, args.bucket, args.key)
+		else:
+			s3_rm_bucket(cxn, args.bucket)
 
 
 # vim :set noet
