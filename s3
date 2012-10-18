@@ -50,8 +50,8 @@ usage: s3 [-h|--help] [<options>] <command> [<args>]
 
   options:
     -h, --help         print this message and exit
-    -o, --openstack    source ~/.novarc
-    -e, --eucalyptus   source ~/.eucarc
+    -o, --openstack    source ~/.ec2-novarc
+    -e, --eucalyptus   source ~/.ec2-eucarc
 
 """
 
@@ -167,8 +167,8 @@ def s3_argparse():
 	parser.format_help  = lambda : S3_USAGE
 	parser.format_usage = lambda : S3_USAGE
 
-	parser.add_argument("-o", "--openstack",  dest="rc", action="store_const", const="~/.novarc", default=None)
-	parser.add_argument("-e", "--eucalyptus", dest="rc", action="store_const", const="~/.eucarc")
+	parser.add_argument("-o", "--openstack",  dest="rc", action="store_const", const="~/.ec2-novarc", default=None)
+	parser.add_argument("-e", "--eucalyptus", dest="rc", action="store_const", const="~/.ec2-eucarc")
 
 	sparsers = parser.add_subparsers(dest="cmd")
 
