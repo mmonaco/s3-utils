@@ -1,0 +1,27 @@
+s3-utils
+---------
+
+This is for working with the S3 API. It was started because I find the
+euca2ools suite really awkward and not very helpful. Please fork and
+contribute!
+
+
+DEPENDENCIES
+------------
+
+python2
+boto
+
+
+TODO
+----
+Add more commands
+Add an installer
+Handle python2 and python3
+
+
+LICENSE
+-------
+GPLv2
+
+# vim: set tw=72 spell :

@@ -21,6 +21,8 @@ import os, re, sys, subprocess
 import argparse
 import boto.s3.connection
 
+VERSION="s3 0"
+
 S3_USAGE = """\
 usage: s3 [-h|--help] [<options>] <command> [<args>]
 
@@ -52,6 +54,7 @@ usage: s3 [-h|--help] [<options>] <command> [<args>]
     -h, --help         print this message and exit
     -o, --openstack    source ~/.ec2-novarc
     -e, --eucalyptus   source ~/.ec2-eucarc
+    --version          print version number and exit
 
 """
 
@@ -169,6 +172,7 @@ def s3_argparse():
 
 	parser.add_argument("-o", "--openstack",  dest="rc", action="store_const", const="~/.ec2-novarc", default=None)
 	parser.add_argument("-e", "--eucalyptus", dest="rc", action="store_const", const="~/.ec2-eucarc")
+	parser.add_argument("--version", action="version", version=str(VERSION))
 
 	sparsers = parser.add_subparsers(dest="cmd")
 
